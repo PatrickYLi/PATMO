@@ -1,0 +1,9 @@
+This is the 2022 sulfur network analysis standard model, abbreviated as ./2022STD_v1
+It is the same as model ./2022_SulfurNetwork_DaytimeWeighted_v2
+
+Here show the features included:
+1. Daytime Weighted Zenith Angle Optimization:
+   1. Solar Constant *2
+   2. Zenith Angle 60°, cosine zenith angle value equals to 1/2.
+2. Emission unit conversion method and data are updated. (details in patmo_ode.f90)
+3. Dry deposition data are updated. (details in patmo_ode.f90)
