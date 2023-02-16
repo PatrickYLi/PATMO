@@ -1,0 +1,2 @@
+The content in DataFiles should be added to the build folder 
+after it was created by the python code
