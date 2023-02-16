@@ -1,0 +1,6 @@
+cellsNumber 	= 60
+photoBinsNumber = 4440
+network 	= tests/2022_CS2_v1/sulfur.ntw
+energyMin 	= 3.099000
+energyMax	= 6.888010
+usePhotochemistry = T
