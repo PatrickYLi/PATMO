@@ -908,7 +908,7 @@ end function
 
    open(22,file=trim(fname),status="replace")
    write(22,*) "altitude/km, &
-   COS+OH->CO2+SH,COS+O->CO+SO,CS2+OH->SH+COS,CS2+O->CS+SO,CS2+O->COS+S, &
+   COS+OH->CO2+SH,COS+O->CO+SO,CS2+OH->SH+COS,S2+O->CS+SO,CS2+O->COS+S, &
    CS2+O->CO+S2,CS2+OH->SCSOH,SCSOH+O2->COS+HSO2,CS+O2->COS+O,CS+O3->COS+O2, &
    CS+O->CO+S,H2S+OH->H2O+SH,H2S+O->OH+SH,H2S+H->H2+SH,H2S+HO2->H2O+HSO, &
    SH+O->H+SO,SH+O2->OH+SO,SH+O3->HSO+O2,SO+O3->SO2+O2,SO+O2->SO2+O, &

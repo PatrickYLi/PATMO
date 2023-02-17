@@ -163,7 +163,7 @@ contains
       krate(icell,45) = 1.66d-11
 
       !CS + O2 -> CO + SO
-      krate(icell,46) = 2.91d-20
+      krate(icell,46) = 3.01d-18
 
       !SCSOH -> CS2 + OH
       !krate(icell,47) = 6.16d+3
