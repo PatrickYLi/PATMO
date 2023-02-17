@@ -1,15 +1,7 @@
-![](https://bytebucket.org/tgrassi/planatmo/raw/bf879231524ee15ec7f8205fee61af593133a8ca/icon_small.png?token=d5bb9ae2a8489f7f4b2e71a1bb9e75b8ba0bb12d)
+This is a model of modern atmospheric sulfur cycle.
 
-# Welcome to PATMO
+Based on 2022_STD_v3
 
-PATMO is a flexible code aimed at modelling 1D planetary atmospheres including (photo)chemistry, molecular/eddy diffusion, and multi-frequency radiative transfer.  
-It is partially based on [KROME](http://www.kromepackage.org/), as it produces optimized problem-dependent Fortran code by using a Python pre-processor.
+### What's New?
 
-### Getting Started 
-
-Check the [Wiki](https://bitbucket.org/tgrassi/planatmo/wiki/Home) (always under construction)
-
-### Credits  
-PATMO is developed and mantained by [Tommaso Grassi](http://starplan.dk/users/tommaso)  
-Niels Bohr Insitute, Starplan Center, University of Copenhagen   
-Contributors: E.Simoncini, A.Chiavassa, J.Ramsey, N.Vaytet, A.Popovas, T.Haugbølle, S.Bovino.
+k (CS+O2→CO+SO) from 3.01E-18 change to 2.91E-20
