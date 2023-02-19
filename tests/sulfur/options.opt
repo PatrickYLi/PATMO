@@ -1,0 +1,6 @@
+cellsNumber 	= 60
+photoBinsNumber = 4440
+network 	= tests/sulfur/sulfur.ntw
+energyMin 	= 3.099000
+energyMax	= 6.888010
+usePhotochemistry = T
