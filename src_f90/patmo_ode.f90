@@ -5,6 +5,9 @@ contains
     use patmo_constants
     use patmo_parameters
     use patmo_utils
+#IFPATMO_useVolcano
+    use patmo_volcano
+#ENDIFPATMO
     implicit none
     integer,intent(in)::neq
     real*8,intent(in)::tt,nin(neqAll)
@@ -111,7 +114,6 @@ contains
     k_hm(:) = (kzz_hm(:)+dzz_hm(:))*idh2(:)
 
     dn(:,:) = 0d0
-
 #PATMO_ODE
 
     ngas_hpp(:) = ngas_hp(:)/ngas_p(:)
@@ -126,7 +128,72 @@ contains
             + (k_hm(:)-d_hm(:,i)) * ngas_hmz(:)) * n(:,i) &
             + (k_hm(:)+d_hm(:,i)) * ngas_hmm(:) * n_m(:,i)
     end do
+    
+    !Chemical Species with constant concentration
+#PATMO_constantspecies
+    
+    ! Gravity Settling
+#PATMO_gravitysettling
+   
+    ! Dry Deposition: assumed a deposition rate of 0.1 cm/s 
+    !dn(1,patmo_idx_A)=dn(1,patmo_idx_A) - 0.1/(layer_thickness(in cm))*n(1,patmo_idx_A)
+    ! Fix the mixing ratio of CH4 and O2 at the bottom layer as a constant (Claire et al., 2014; Zahnle et al., 2006)
+#PATMO_drydeppecies
+      
+    !Volcanic emission
+    !The release of 1 Tmol/year from Claire et al., 2014, with an H2S:SO2 ratio of 1:10
+    !The release of molecular hydrogen 3 Tmol/year from Claire et al., 2014
+#PATMO_emissionspecies
 
+#IFPATMO_useVolcano
+    call patmo_volcano_apply_sources(tt, n, dn)
+#ENDIFPATMO
+
+#IFPATMO_useWaterRemoval    
+    ! Water Removal
+    dn(:,patmo_idx_H2O) = dn(:,patmo_idx_H2O) - n(:,patmo_idx_H2O) * condenseH2O(:)
+    dn(1,patmo_idx_H2O) = 0d0
+#ENDIFPATMO
+    ! Wet Deposition
+    do j=12, 2, -1
+        do i = 1, chemSpeciesNumber
+            dn(j,     i) = dn(j,     i) - wetdep(j, i) * n(j, i)
+            dn(j - 1, i) = dn(j - 1, i) + wetdep(j, i) * n(j, i)
+        end do
+    end do
+    do i = 1, chemSpeciesNumber
+        dn(1, i) = dn(1, i) - wetdep(1, i) * n(1, i)
+    end do
+#IFPATMO_useAerosolformation   
+    !aerosol formation
+    do i=13,34
+         if (va(i) <= n(i, patmo_idx_H2SO4) .AND. pa(i) >= n(i, patmo_idx_H2SO4)) then
+            dn(i, patmo_idx_H2SO4) = dn(i, patmo_idx_H2SO4) - (n(i, patmo_idx_H2SO4) - va(i))
+            dn(i, patmo_idx_SO4)   = dn(i, patmo_idx_SO4)   + (n(i, patmo_idx_H2SO4) - va(i))
+         end if
+    end do	
+#ENDIFPATMO
+
+    
+#IFPATMO_useHescape
+    ! Hydrogen Escape
+    if (n(cellsNumber, patmo_idx_H) > Hesc) then
+        dn(cellsNumber, patmo_idx_H) = dn(cellsNumber, patmo_idx_H) - Hesc
+        !print *, "triggered H escape"
+    else
+        n(cellsNumber, patmo_idx_H) = 0d0
+        dn(cellsNumber, patmo_idx_H) = 0d0
+    end if
+    
+    if (n(cellsNumber, patmo_idx_H2) > H2esc) then
+        dn(cellsNumber, patmo_idx_H2) = dn(cellsNumber, patmo_idx_H2) - H2esc
+        !print *, "triggered H2 escape"
+    else
+        n(cellsNumber, patmo_idx_H2) = 0d0
+        dn(cellsNumber, patmo_idx_H2) = 0d0
+    end if
+#ENDIFPATMO
+    
     !unroll chemistry
     dy(:) = 0d0
     do i=1,speciesNumber

@@ -17,12 +17,12 @@ contains
     integer::i
 
     !total density per layer
-    ntot(:) = sum(nAll(:,1:chemSpeciesNumber),2)
+    ntot(:) = 0.5*sum(nAll(:,1:chemSpeciesNumber),2)
 
     !extrapolate lower and upper limits
     do i=1,cellsNumber
-       Tgas(i) = min(inTgas(i),#PATMO_Tmin)
-       Tgas(i) = max(Tgas(i),#PATMO_Tmax)
+       Tgas(i) = max(inTgas(i),#PATMO_Tmin)
+       Tgas(i) = min(Tgas(i),#PATMO_Tmax)
     end do
 
     lnTgas(:) = log(Tgas(:))
@@ -32,7 +32,7 @@ contains
     invTgas(:) = 1d0/Tgas(:)
 
 #PATMO_reverseRates
-
+    
   end subroutine computeReverseRates
 
 end module patmo_reverseRates
