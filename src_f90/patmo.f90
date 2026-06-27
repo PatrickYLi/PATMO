@@ -7,9 +7,6 @@ contains
     use patmo_photo
     use patmo_parameters
     use patmo_utils
-#IFPATMO_useVolcano
-    use patmo_volcano
-#ENDIFPATMO
 
 #IFPATMO_usePhotochemistry
     !load photo metrics (i.e. binning)
@@ -31,11 +28,6 @@ contains
     !load verbatim reactions
     call loadReactionsVerbatim()
 
-#IFPATMO_useVolcano
-    call patmo_volcano_init(#PATMO_volcanoFile, &
-         #PATMO_volcanoAshSettling, #PATMO_volcanoAshDecay)
-#ENDIFPATMO
-
   end subroutine patmo_init
 
   !**************
@@ -51,9 +43,7 @@ contains
     use patmo_photoRates
     use patmo_reverseRates
     use patmo_utils
-#IFPATMO_useVolcano
-    use patmo_volcano
-#ENDIFPATMO
+    use patmo_volc, only: patmo_volc_applyAshOpacity, patmo_volc_advanceTime
     implicit none
     real*8,intent(in)::dt
     real*8,intent(out)::convergence
@@ -119,10 +109,7 @@ contains
        end do
        tauAll(:,j) = tauAll(:,j+1) + gridSpace(j) * sumxn(:)
     end do
-#ENDIFPATMO
-
-#IFPATMO_useVolcano
-    call patmo_volcano_add_opacity(tauAll)
+    call patmo_volc_applyAshOpacity(tauAll(:,:))
 #ENDIFPATMO
 
     !unroll chemistry
@@ -207,9 +194,7 @@ contains
     !roll Tgas
     TgasAll(:) = n((positionTgas-1)*cellsNumber+1:(positionTgas*cellsNumber))
 
-#IFPATMO_useVolcano
-    call patmo_volcano_finalize_step(dt)
-#ENDIFPATMO
+    call patmo_volc_advanceTime(dt)
 
   end subroutine patmo_run
 
@@ -424,7 +409,7 @@ contains
        !resacale abundances depending on total pressure
        nall(i,1:chemSpeciesNumber) = &
             n(1:chemSpeciesNumber) &
-            / sum(n(1:chemSpeciesNumber))*ntot
+            / (0.5*sum(n(1:chemSpeciesNumber)))*ntot
        !store old height
        zold = height(i)
     end do
@@ -448,7 +433,7 @@ contains
     write(22,*) "#alt/km p/mbar Tgas/K"
     !loop on cells
     do i=1,cellsNumber
-       ntot = sum(nall(i,1:chemSpeciesNumber))
+       ntot = 0.5*sum(nall(i,1:chemSpeciesNumber))
        write(22,*) height(i)/1d5,ntot*kboltzmann*TgasAll(i)/1d3,TgasAll(i)
     end do
     close(33)
@@ -550,7 +535,7 @@ contains
 
        !convert units if necessary
        if(trim(unitsX)=="ppbv") then
-          nall(j,:) = nall(j,:)/sum(nall(j,1:chemSpeciesNumber))
+          nall(j,:) = nall(j,:)/(0.5*sum(nall(j,1:chemSpeciesNumber)))
        elseif(trim(unitsX)=="1/cm3") then
           continue
        else
@@ -750,7 +735,7 @@ contains
 
     do i=1,cellsNumber
        write(ifile,'(E17.8,I8,E17.8E3)') time, i, nall(i,idx) &
-            / sum(nall(i,1:chemSpeciesNumber))
+            / (0.5*sum(nall(i,1:chemSpeciesNumber)))
     end do
     write(ifile,*)
 
@@ -926,12 +911,12 @@ contains
             + 2d0 * nAll(cellsNumber, patmo_idx_H2) &
             + 2d0 * nAll(cellsNumber, patmo_idx_H2O) &
             + 4d0 * nAll(cellsNumber, patmo_idx_CH4)) &
-            / sum(nAll(cellsNumber,1:chemSpeciesNumber))
+            / (0.5*sum(nAll(cellsNumber,1:chemSpeciesNumber)))
    H2esc = 2.5d8 * &
             (nAll(cellsNumber, patmo_idx_H2) &
             + nAll(cellsNumber, patmo_idx_H2O)&
             + 2d0 * nAll(cellsNumber, patmo_idx_CH4))&
-            / sum(nAll(cellsNumber,1:chemSpeciesNumber))
+            / (0.5*sum(nAll(cellsNumber,1:chemSpeciesNumber)))
  end subroutine computeHescape
 
  subroutine patmo_dumpHescape(ifile, time)

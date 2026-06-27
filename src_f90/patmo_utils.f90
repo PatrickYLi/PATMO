@@ -24,8 +24,6 @@ contains
 
   end subroutine computeEntropyProductionFlux
 
-  !**************
-  !print elapsed wall-clock time as hours:minutes:seconds:milliseconds
   subroutine patmo_printElapsedTime(label,elapsed_ms)
     implicit none
     character(len=*),intent(in)::label

@@ -15,8 +15,8 @@ switch = $(switchOPT)
 
 #objects that need fortran, mind the sequence
 gnu_objs = opkda1.o opkda2.o opkdmain.o patmo_commons.o patmo_constants.o \
-    	patmo_parameters.o patmo_utils.o patmo_volcano.o patmo_rates.o patmo_reverseRates.o \
-    	patmo_photo.o patmo_photoRates.o patmo_sparsity.o patmo_jacobian.o \
+    	patmo_parameters.o patmo_utils.o patmo_rates.o patmo_reverseRates.o \
+    	patmo_photo.o patmo_photoRates.o patmo_volc.o patmo_sparsity.o patmo_jacobian.o \
     	patmo_ode.o patmo.o test.o\
 
 # default target
