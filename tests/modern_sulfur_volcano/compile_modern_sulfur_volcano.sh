@@ -316,19 +316,7 @@ print(f"options.opt created at: {out_path}")
 PY
 echo "options.opt created successfully."
 if [[ -f "${BASE_DIR}/volcano_events.dat" ]]; then
-  echo "[*] Appending default volcano options ..."
-  if ! grep -Eq '^[[:space:]]*useVolcano[[:space:]]*=' "$OPTIONS_OPT"; then
-    echo "useVolcano = T" >> "$OPTIONS_OPT"
-  fi
-  if ! grep -Eq '^[[:space:]]*volcanoFile[[:space:]]*=' "$OPTIONS_OPT"; then
-    echo "volcanoFile = volcano_events.dat" >> "$OPTIONS_OPT"
-  fi
-  if ! grep -Eq '^[[:space:]]*volcanoAshSettling[[:space:]]*=' "$OPTIONS_OPT"; then
-    echo "volcanoAshSettling = 1.0e-6" >> "$OPTIONS_OPT"
-  fi
-  if ! grep -Eq '^[[:space:]]*volcanoAshDecay[[:space:]]*=' "$OPTIONS_OPT"; then
-    echo "volcanoAshDecay = 2.0e-7" >> "$OPTIONS_OPT"
-  fi
+  echo "[*] Volcano forcing will be read by test.f90 from volcano_events.dat"
 fi
 
 # -------------------------------

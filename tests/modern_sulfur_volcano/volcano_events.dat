@@ -1,4 +1,35 @@
-# start_day duration_day center_km sigma_km so2_column_flux ash_tau_550 ash_lifetime_day ash_settling_cm_s ash_wavelength_exp
-# so2_column_flux is molecules cm-2 s-1; ash_tau_550 is the effective 550 nm column optical depth.
-0d0   20d0  25d0  2.5d0  5d11  0.5d0  120d0  0.2d0  1d0
-365d0 20d0  25d0  2.5d0  5d11  3.0d0  120d0  0.2d0  1d0
+# PATMO volcanic forcing input
+#
+# One active event per non-comment line. Use key=value pairs; spaces around "="
+# are allowed, and "," may be used as a separator. Lines beginning with "#"
+# or "!" are ignored. Inline comments after "#" or "!" are also ignored.
+#
+# Required keys for each event:
+#   event_id              free text label for your own bookkeeping
+#   start_day             eruption start time from model t=0 [day]
+#   duration_day          time interval with active SO2 injection and full ash load [day]
+#   plume_center_km       center altitude of the volcanic plume [km]
+#   plume_sigma_km        Gaussian vertical width of the plume [km]
+#
+# Source / shielding keys:
+#   so2_flux_cm2_s        SO2 column source [molecules cm-2 s-1]
+#                         The code distributes this over height as a Gaussian
+#                         source with units molecules cm-3 s-1.
+#   ash_tau_550           volcanic ash column optical depth at 550 nm [-]
+#                         Larger values mean stronger sunlight shielding.
+#
+# Ash time/radiation keys:
+#   ash_lifetime_day      e-folding decay time after duration_day [day]
+#                         <0 keeps ash constant; 0 removes ash immediately.
+#   ash_settling_cm_s     downward motion speed of the ash plume center [cm s-1]
+#   ash_lambda_exponent   spectral scaling alpha: tau(lambda)=tau550*(lambda/550nm)^(-alpha)
+#                         alpha=0 is gray shielding; alpha>0 shields UV more strongly.
+#
+# Suggested sensitivity knobs:
+#   thin ash:  ash_tau_550 ~ 0.1-0.5
+#   thick ash: ash_tau_550 ~ 1-5
+#   high injection: plume_center_km >= 20 for stratospheric SO2 experiments
+#
+# Example: same SO2 injection, first with thin ash and then with thick ash.
+event_id=thin_ash  start_day=0d0    duration_day=20d0 plume_center_km=25d0 plume_sigma_km=2.5d0 so2_flux_cm2_s=5d11 ash_tau_550=0.5d0 ash_lifetime_day=120d0 ash_settling_cm_s=0.2d0 ash_lambda_exponent=1d0
+event_id=thick_ash start_day=365d0  duration_day=20d0 plume_center_km=25d0 plume_sigma_km=2.5d0 so2_flux_cm2_s=5d11 ash_tau_550=3.0d0 ash_lifetime_day=120d0 ash_settling_cm_s=0.2d0 ash_lambda_exponent=1d0

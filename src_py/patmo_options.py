@@ -22,10 +22,6 @@ class options:
         self.useHescape = False
         self.useWaterRemoval = False
         self.useAerosolformation = False
-        self.useVolcano = False
-        self.volcanoFile = "volcano_events.dat"
-        self.volcanoAshSettling = 0.0
-        self.volcanoAshDecay = 0.0
         self.gravity_species = {}
         self.constant_species = []
         self.drydep_species = {}
@@ -40,8 +36,6 @@ class options:
             "wavelengMax",
             "zenith_angle",
             "TOA_para",
-            "volcanoAshSettling",
-            "volcanoAshDecay",
         ]
         boolType = [
             "plotRates",
@@ -50,7 +44,6 @@ class options:
             "useHescape",
             "useWaterRemoval",
             "useAerosolformation",
-            "useVolcano",
         ]
         listType = ["species", "constant_species"]
         dictionaryType = ["emission_species", "drydep_species","gravity_species"]

@@ -84,9 +84,11 @@ contains
   end subroutine patmo_volc_advanceTime
 
   !***************
-  ! Event file columns:
-  ! start_day duration_day center_km sigma_km so2_column_flux
-  ! ash_tau_550 ash_lifetime_day ash_settling_cm_s ash_wavelength_exp
+  ! Preferred event file format, one event per line:
+  ! event_id=name start_day=... duration_day=... plume_center_km=...
+  ! plume_sigma_km=... so2_flux_cm2_s=... ash_tau_550=...
+  ! ash_lifetime_day=... ash_settling_cm_s=... ash_lambda_exponent=...
+  ! Legacy numeric rows are still accepted in the same column order.
   subroutine patmo_volc_loadEvents(fname)
     use patmo_constants
     implicit none
@@ -111,7 +113,7 @@ contains
     do
        read(unitEvent,'(A)',iostat=ios) line
        if(ios/=0) exit
-       commentPos = index(line,"#")
+       commentPos = patmo_volc_commentStart(line)
        if(commentPos>0) line = line(:commentPos-1)
        if(len_trim(line)==0) cycle
        volcanoEventsNumber = volcanoEventsNumber + 1
@@ -134,7 +136,7 @@ contains
     do
        read(unitEvent,'(A)',iostat=ios) line
        if(ios/=0) exit
-       commentPos = index(line,"#")
+       commentPos = patmo_volc_commentStart(line)
        if(commentPos>0) line = line(:commentPos-1)
        if(len_trim(line)==0) cycle
 
@@ -148,9 +150,15 @@ contains
        ashSettling = 0d0
        ashWavelengthExp = 0d0
 
-       read(line,*,iostat=ios) startDay,durationDay,centerKm,sigmaKm, &
-            so2ColumnFlux,ashTau550,ashLifetimeDay,ashSettling, &
-            ashWavelengthExp
+       if(index(line,"=")>0) then
+          call patmo_volc_parseKeywordEvent(line,startDay,durationDay, &
+               centerKm,sigmaKm,so2ColumnFlux,ashTau550,ashLifetimeDay, &
+               ashSettling,ashWavelengthExp,ios)
+       else
+          read(line,*,iostat=ios) startDay,durationDay,centerKm,sigmaKm, &
+               so2ColumnFlux,ashTau550,ashLifetimeDay,ashSettling, &
+               ashWavelengthExp
+       end if
        if(ios/=0) then
           print *,"ERROR: malformed volcano event row:"
           print *,trim(line)
@@ -458,5 +466,190 @@ contains
     patmo_volc_ashSpectralScale = min(max(patmo_volc_ashSpectralScale,1d-6),1d6)
 
   end function patmo_volc_ashSpectralScale
+
+  !***************
+  function patmo_volc_commentStart(line)
+    implicit none
+    character(len=*),intent(in)::line
+    integer::patmo_volc_commentStart,hashPos,bangPos
+
+    hashPos = index(line,"#")
+    bangPos = index(line,"!")
+    if(hashPos>0.and.bangPos>0) then
+       patmo_volc_commentStart = min(hashPos,bangPos)
+    elseif(hashPos>0) then
+       patmo_volc_commentStart = hashPos
+    elseif(bangPos>0) then
+       patmo_volc_commentStart = bangPos
+    else
+       patmo_volc_commentStart = 0
+    end if
+
+  end function patmo_volc_commentStart
+
+  !***************
+  subroutine patmo_volc_parseKeywordEvent(line,startDay,durationDay, &
+       centerKm,sigmaKm,so2ColumnFlux,ashTau550,ashLifetimeDay, &
+       ashSettling,ashWavelengthExp,ios)
+    implicit none
+    character(len=*),intent(in)::line
+    real*8,intent(inout)::startDay,durationDay,centerKm,sigmaKm
+    real*8,intent(inout)::so2ColumnFlux,ashTau550,ashLifetimeDay
+    real*8,intent(inout)::ashSettling,ashWavelengthExp
+    integer,intent(out)::ios
+    character(len=512)::work
+    character(len=80)::key,value
+    integer::eqPos,keyStart,keyEnd,valueStart,valueEnd,nline,readIos
+    logical::hasStart,hasDuration,hasCenter,hasSigma,hasSource
+    real*8::tmp
+
+    ios = 0
+    hasStart = .false.
+    hasDuration = .false.
+    hasCenter = .false.
+    hasSigma = .false.
+    hasSource = .false.
+
+    work = adjustl(line)
+    do eqPos=1,len(work)
+       if(work(eqPos:eqPos)==",".or.work(eqPos:eqPos)==char(9)) work(eqPos:eqPos) = " "
+    end do
+    nline = len_trim(work)
+
+    do
+       eqPos = index(work,"=")
+       if(eqPos<=0) exit
+
+       keyEnd = eqPos - 1
+       do while(keyEnd>=1.and.work(keyEnd:keyEnd)==" ")
+          keyEnd = keyEnd - 1
+       end do
+
+       keyStart = keyEnd
+       do while(keyStart>1.and.work(keyStart-1:keyStart-1)/=" ")
+          keyStart = keyStart - 1
+       end do
+
+       valueStart = eqPos + 1
+       do while(valueStart<=nline.and.work(valueStart:valueStart)==" ")
+          valueStart = valueStart + 1
+       end do
+
+       valueEnd = valueStart
+       do while(valueEnd<=nline)
+          if(work(valueEnd:valueEnd)==" ".or.work(valueEnd:valueEnd)==",") exit
+          valueEnd = valueEnd + 1
+       end do
+       valueEnd = valueEnd - 1
+
+       key = " "
+       value = " "
+       if(keyStart<=keyEnd) key = patmo_volc_lower(work(keyStart:keyEnd))
+       if(valueStart<=valueEnd) value = adjustl(work(valueStart:valueEnd))
+
+       select case(trim(key))
+       case("event_id","event","name","scenario")
+          continue
+       case("start_day","start")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          startDay = tmp
+          hasStart = .true.
+       case("duration_day","duration")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          durationDay = tmp
+          hasDuration = .true.
+       case("plume_center_km","center_km","injection_center_km")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          centerKm = tmp
+          hasCenter = .true.
+       case("plume_sigma_km","sigma_km","injection_sigma_km")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          sigmaKm = tmp
+          hasSigma = .true.
+       case("so2_flux_cm2_s","so2_column_flux_cm2_s","so2_column_flux")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          so2ColumnFlux = tmp
+          hasSource = .true.
+       case("ash_tau_550","ash_optical_depth_550","ash_aod_550")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          ashTau550 = tmp
+          hasSource = .true.
+       case("ash_lifetime_day","ash_decay_day")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          ashLifetimeDay = tmp
+       case("ash_settling_cm_s","ash_fall_speed_cm_s")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          ashSettling = tmp
+       case("ash_lambda_exponent","ash_wavelength_exp","ash_angstrom_exp")
+          read(value,*,iostat=readIos) tmp
+          if(readIos/=0) then
+             ios = 1
+             return
+          end if
+          ashWavelengthExp = tmp
+       case default
+          print *,"WARNING: unknown volcano event key ignored: ",trim(key)
+       end select
+
+       if(valueEnd>=nline) exit
+       work = adjustl(work(valueEnd+1:))
+       nline = len_trim(work)
+    end do
+
+    if(.not.(hasStart.and.hasDuration.and.hasCenter.and.hasSigma.and.hasSource)) then
+       ios = 1
+    end if
+
+  end subroutine patmo_volc_parseKeywordEvent
+
+  !***************
+  function patmo_volc_lower(text)
+    implicit none
+    character(len=*),intent(in)::text
+    character(len=len(text))::patmo_volc_lower
+    integer::i,ich
+
+    do i=1,len(text)
+       ich = iachar(text(i:i))
+       if(ich>=iachar("A").and.ich<=iachar("Z")) then
+          patmo_volc_lower(i:i) = achar(ich + iachar("a") - iachar("A"))
+       else
+          patmo_volc_lower(i:i) = text(i:i)
+       end if
+    end do
+
+  end function patmo_volc_lower
 
 end module patmo_volc
