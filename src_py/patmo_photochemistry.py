@@ -3,23 +3,7 @@ import patmo_string
 import patmo_reaction
 import patmo_species
 from math import log10,exp
-
-
-def linear_interp(x_values, y_values, x_target):
-	if x_target <= x_values[0]:
-		return y_values[0]
-	if x_target >= x_values[-1]:
-		return y_values[-1]
-	for idx in range(1, len(x_values)):
-		if x_target <= x_values[idx]:
-			x0 = x_values[idx - 1]
-			x1 = x_values[idx]
-			y0 = y_values[idx - 1]
-			y1 = y_values[idx]
-			if x1 == x0:
-				return y1
-			return y0 + (y1 - y0) * (x_target - x0) / (x1 - x0)
-	return y_values[-1]
+from scipy.interpolate import interp1d
 
 class photochemistry:
 
@@ -226,17 +210,16 @@ class photochemistry:
 		indexBase = len(self.network.reactions)
 		index = 1
     
+		from scipy.interpolate import interp1d
 		for reaction in self.network.photoReactions:
             # Save the original cross-section (as loaded from file)
 			reaction.dumpXsec(reportFolder, postpone="_org.dat")
-			originalXsecEnergy = list(reaction.xsecEnergy)
-			originalXsec = list(reaction.xsec)
-			if len(originalXsecEnergy) == 0 or len(originalXsec) == 0:
-				continue
-
+    
             # Interpolator (allow extrapolation outside range -> 0)
-			minEnergy = min(originalXsecEnergy)
-			maxEnergy = max(originalXsecEnergy)
+			finterp = interp1d(reaction.xsecEnergy, reaction.xsec,
+                               bounds_error=False, fill_value=0.0)
+			minEnergy = min(reaction.xsecEnergy)
+			maxEnergy = max(reaction.xsecEnergy)
     
             # Reset arrays before storing interpolated results
 			reaction.xsecEnergy = []
@@ -246,8 +229,8 @@ class photochemistry:
 			for ienergy in range(len(self.energyMetric["mid"])):
 				xL = self.energyMetric["left"][ienergy]
 				xR = self.energyMetric["right"][ienergy]
-				fL = linear_interp(originalXsecEnergy, originalXsec, xL) if (minEnergy <= xL <= maxEnergy) else 0.0
-				fR = linear_interp(originalXsecEnergy, originalXsec, xR) if (minEnergy <= xR <= maxEnergy) else 0.0
+				fL = finterp(xL) if (minEnergy <= xL <= maxEnergy) else 0.0
+				fR = finterp(xR) if (minEnergy <= xR <= maxEnergy) else 0.0
     
 				reaction.xsecEnergy.append(self.energyMetric["mid"][ienergy])
 				reaction.xsecEnergySpan.append(self.energyMetric["right"][ienergy] - self.energyMetric["left"][ienergy])

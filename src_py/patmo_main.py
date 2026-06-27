@@ -31,47 +31,13 @@ def buildMain(network,options):
 		allReactions += ", " + reaction.getVerbatim().replace(" ", "")
 		allReactionRates += ", &\n        " + reaction.getRHS().replace("n(", "nall(").replace(":", "i")
 
-	volcanoFile = '"' + options.volcanoFile.replace('"', "").strip() + '"'
-	volcanoAshSettling = patmo_string.f90DoubleCompact(options.volcanoAshSettling)
-	volcanoAshDecay = patmo_string.f90DoubleCompact(options.volcanoAshDecay)
-
 	#replace pragma
-	pragmaList = [
-		"#PATMO_massNucleiFunctions",
-		"#PATMO_JValueReactions",
-		"#PATMO_JValues",
-		"#PATMO_DumpReactions",
-		"#PATMO_DumpAllReactionRates",
-		"#PATMO_volcanoFile",
-		"#PATMO_volcanoAshSettling",
-		"#PATMO_volcanoAshDecay",
-	]
-	replaceList = [
-		allMassFunctions,
-		allPhotoReactions,
-		allJValues,
-		allReactions,
-		allReactionRates,
-		volcanoFile,
-		volcanoAshSettling,
-		volcanoAshDecay,
-	]
+	pragmaList = ["#PATMO_massNucleiFunctions", "#PATMO_JValueReactions", "#PATMO_JValues", "#PATMO_DumpReactions", "#PATMO_DumpAllReactionRates"]
+	replaceList = [allMassFunctions, allPhotoReactions, allJValues, allReactions, allReactionRates]
 
 	#condition pragmas
-	ifPragmas = [
-		"#IFPATMO_use_opacity",
-		"#IFPATMO_usePhotochemistry",
-		"#IFPATMO_useHescape",
-		"#IFPATMO_useHescape_dump",
-		"#IFPATMO_useVolcano",
-	]
-	ifConditions = [
-		options.usePhotochemistry,
-		options.usePhotochemistry,
-		options.useHescape,
-		options.useHescape,
-		options.useVolcano,
-	]
+	ifPragmas = ["#IFPATMO_use_opacity","#IFPATMO_usePhotochemistry", "#IFPATMO_useHescape", "#IFPATMO_useHescape_dump"]
+	ifConditions = [options.usePhotochemistry, options.usePhotochemistry, options.useHescape, options.useHescape]
 
 	patmo_string.fileReplaceBuild("src_f90/patmo.f90", "build/patmo.f90", \
 		pragmaList, replaceList, ifPragmas, ifConditions)

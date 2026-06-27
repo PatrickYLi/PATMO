@@ -1,15 +1,11 @@
 from math import log10,exp,log,sqrt
 from subprocess import Popen, PIPE
 import os,sys,shutil,inspect
+import matplotlib.pyplot as plt
 import patmo_reaction
 import patmo_string
 import patmo_species
 import patmo_error
-
-try:
-	import matplotlib.pyplot as plt
-except ImportError:
-	plt = None
 
 class network:
 
@@ -471,9 +467,6 @@ class network:
 	#**********************
 	#plot rates to PNGs
 	def plotRates(self):
-		if plt is None:
-			print("WARNING: matplotlib is not installed; skipping rate plots.")
-			return
 
 		#ouput folder
 		outFolder = "htmlDocs/ratePNGs/"
@@ -538,9 +531,6 @@ class network:
 	#**********************
 	#plot rates to PNGs
 	def plotReverseRates(self):
-		if plt is None:
-			print("WARNING: matplotlib is not installed; skipping reverse-rate plots.")
-			return
 
 		#ouput folder
 		outFolder = "htmlDocs/rateReversePNGs/"
@@ -699,18 +689,8 @@ class network:
 		replaceList = [fullODE,const_spec,gravity_spec,drydep,emis_spec]
 
 		#condition pragmas
-		ifPragmas = [
-			"#IFPATMO_useHescape",
-			"#IFPATMO_useAerosolformation",
-			"#IFPATMO_useWaterRemoval",
-			"#IFPATMO_useVolcano",
-		]
-		ifConditions = [
-			options.useHescape,
-			options.useAerosolformation,
-			options.useWaterRemoval,
-			options.useVolcano,
-		]
+		ifPragmas = ["#IFPATMO_useHescape","#IFPATMO_useAerosolformation","#IFPATMO_useWaterRemoval"]
+		ifConditions = [options.useHescape,options.useAerosolformation,options.useWaterRemoval]
 		
 		patmo_string.fileReplaceBuild("src_f90/patmo_ode.f90", "build/patmo_ode.f90", \
 			pragmaList, replaceList, ifPragmas, ifConditions)
@@ -789,4 +769,6 @@ class network:
 
 		#remove temporary dot file
 		os.remove("tmp.dot")
+
+
 

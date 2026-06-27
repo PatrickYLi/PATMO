@@ -24,8 +24,8 @@ class options:
         self.useAerosolformation = False
         self.useVolcano = False
         self.volcanoFile = "volcano_events.dat"
-        self.volcanoAshSettling = 1.0e-6
-        self.volcanoAshDecay = 2.0e-7
+        self.volcanoAshSettling = 0.0
+        self.volcanoAshDecay = 0.0
         self.gravity_species = {}
         self.constant_species = []
         self.drydep_species = {}
@@ -84,7 +84,7 @@ class options:
 
                 elif option in floatType:
                     try:
-                        value = float(value.replace("D", "E").replace("d", "e"))
+                        value = float(value)
                     except ValueError:
                         value = 0.0
 
