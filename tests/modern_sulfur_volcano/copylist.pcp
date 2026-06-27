@@ -1,0 +1,14 @@
+test.f90
+profile.dat
+solar_flux.txt
+partial_H2SO4.txt
+Rainout-CS2.txt
+Rainout-H2S.txt
+Rainout-H2SO4.txt
+Rainout-HSO3.txt
+Rainout-OCS.txt
+Rainout-SO2.txt
+Rainout-SO4.txt
+SO4_deposition_rate.txt
+vapor_H2SO4.txt
+volcano_events.dat

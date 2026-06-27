@@ -1,0 +1,4 @@
+# start_day duration_day center_km sigma_km so2_column_flux ash_tau_550 ash_lifetime_day ash_settling_cm_s ash_wavelength_exp
+# so2_column_flux is molecules cm-2 s-1; ash_tau_550 is the effective 550 nm column optical depth.
+0d0   20d0  25d0  2.5d0  5d11  0.5d0  120d0  0.2d0  1d0
+365d0 20d0  25d0  2.5d0  5d11  3.0d0  120d0  0.2d0  1d0
