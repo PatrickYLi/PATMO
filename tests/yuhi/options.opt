@@ -1,0 +1,16 @@
+network = tests/yuhi/reaction_network.ntw
+cellsNumber = 60
+cellThickness = 1000
+photoBinsNumber = 44000
+wavelengMin = 180
+wavelengMax = 400
+zenith_angle = 60
+TOA_para = 0.5
+usePhotochemistry = T
+useHescape = F
+useWaterRemoval = F
+useAerosolformation = T
+useGravitySettling = 32SO4:gd(j), 33SO4:gd(j), 34SO4:gd(j), 36SO4:gd(j)
+constant_species = N2, O2, O3, H2O, CO2, HO2, N, CO, OH, O, H, CH4O3S, H2,  M
+drydep_species = 32COS:8.80d-3, 33COS:8.80d-3, 34COS:8.780036175d-3, 36COS:8.80d-3, 32SO2:7.15d-2, 33SO2:7.15d-2, 34SO2:7.15d-2, 36SO2:7.15d-2, 32CS2:3.0d-4, 33CS2:3.0d-4, 34CS2:3.0d-4, 36CS2:3.0d-4,
+emission_species = 32COS:5.4951739696d7/1d5, 33COS:4.3520906528d5/1d5, 34COS:2.4522905848d6/1d5, 36COS:0.8604213112d4/1d5, 32CS2:3.743714386d7/1d5, 33CS2:2.964810559d5/1d5, 34CS2:1.670514358d6/1d5, 36CS2:5.860727256d3/1d5, 32H2S:1.04643246d9/1d5, 33H2S:8.247250258d6/1d5, 34H2S:4.625934159d7/1d5, 36H2S:1.609483057d5/1d5, 32SO2:5.613738738d9/1d5, 33SO2:4.433466528d7/1d5, 34SO2:2.491566169d8/1d5, 36SO2:8.699801621d6/1d5, 32CH3SCH3:2.507302919d9/1d5, 33CH3SCH3:1.995407157d7/1d5, 34CH3SCH3:1.129434747d8/1d5, 36CH3SCH3:3.995351447d5/1d5
